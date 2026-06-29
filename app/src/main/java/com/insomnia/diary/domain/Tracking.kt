@@ -52,10 +52,12 @@ data class AwakeEvents(
     val totalAwake: Duration,
 )
 
-/** A daytime nap; [duration] is derived from [start] and [end]. */
-data class Nap(
-    val start: LocalDateTime,
-    val end: LocalDateTime,
-) {
-    val duration: Duration get() = Duration.between(start, end)
-}
+/**
+ * A timestamped reading of battery (energy) remaining. The user logs a few
+ * across the day; per-interval drain or recharge is derived between them, and
+ * the last reading of the day stands in for end-of-day exhaustion.
+ */
+data class BatteryCheckpoint(
+    val at: LocalDateTime,
+    val level: Percentage,
+)

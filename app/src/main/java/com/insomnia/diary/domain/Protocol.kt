@@ -48,14 +48,15 @@ data class MorningProtocol(
 /**
  * The evening protocol, recording the day just passed.
  *
- * This mirrors the prototype's scope; the fuller model (stress timeline, day
- * context, social events) is specified in docs/PRD.md and built out in v1.
+ * The day is captured as a timeline of [events] plus [battery] checkpoints;
+ * stress and energy are derived from these (see docs/PRD.md). Day context
+ * (day-type, location, tags) is still to be added.
  */
 data class EveningProtocol(
     override val recordedAt: LocalDateTime,
     override val moods: List<Mood>,
     val productivity: Percentage,
-    val exhaustion: Percentage,
-    val naps: List<Nap> = emptyList(),
     val alcohol: List<Substance> = emptyList(),
+    val events: List<DayEvent> = emptyList(),
+    val battery: List<BatteryCheckpoint> = emptyList(),
 ) : Protocol
