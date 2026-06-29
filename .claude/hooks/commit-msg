@@ -1,0 +1,13 @@
+#!/bin/sh
+# Lint the commit message against .gitlint before the commit is created.
+#
+# gitlint has no module entrypoint and its console script is not always on
+# PATH, so invoke its CLI through Python. Prefer `python` (present on the
+# Windows setup); fall back to `python3` (typical on Linux).
+if command -v python >/dev/null 2>&1; then
+    py=python
+else
+    py=python3
+fi
+
+"$py" -c "from gitlint.cli import cli; cli()" --msg-filename "$1"

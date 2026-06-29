@@ -53,3 +53,6 @@ repository. Follow them for every file you create or modify.
 
 - Commit messages are linted by gitlint; see `.gitlint`.
 - Keep the subject in the imperative mood and within its length limit.
+- The commit-msg hook is tracked at `.claude/hooks/commit-msg`. After a
+  fresh clone, enable it once with `git config core.hooksPath
+  .claude/hooks` and ensure gitlint is installed (`pip install gitlint`).
