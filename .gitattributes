@@ -1,0 +1,3 @@
+# Normalise line endings: store and check out LF on every platform, so the
+# tracked shell hook (and all text) stays runnable on Linux.
+* text=auto eol=lf
