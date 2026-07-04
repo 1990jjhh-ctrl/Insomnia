@@ -18,6 +18,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -27,13 +28,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.insomnia.diary.domain.Dream
 import com.insomnia.diary.domain.Substance
+import com.insomnia.diary.ui.components.DateField
 import com.insomnia.diary.ui.components.MoodPicker
 import com.insomnia.diary.ui.components.PercentageSlider
 import com.insomnia.diary.ui.components.TimeField
@@ -42,13 +44,13 @@ import com.insomnia.diary.ui.components.TimeField
 @Composable
 fun MorningScreen(
     onDone: () -> Unit,
-    viewModel: MorningViewModel = viewModel(),
+    viewModel: MorningViewModel,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(state.savedSuccessfully) { if (state.savedSuccessfully) onDone() }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Morning Protocol") }) },
+        topBar = { TopAppBar(title = { Text(if (viewModel.isEditing) "Edit Morning" else "Morning Protocol") }) },
     ) { padding ->
         Column(
             modifier = Modifier
@@ -59,13 +61,29 @@ fun MorningScreen(
         ) {
             Spacer(Modifier.height(4.dp))
             SectionLabel("How are you feeling?")
-            MoodPicker(selected = state.moods, onToggle = viewModel::toggleMood)
+            MoodPicker(
+                selected = state.moods,
+                onToggle = viewModel::toggleMood,
+                extraMoods = state.customMoods,
+            )
 
             HorizontalDivider()
             PercentageSlider("Recovery", state.recovery, viewModel::setRecovery)
 
             HorizontalDivider()
             SectionLabel("Sleep times")
+            DateField("Date", state.date, viewModel::setDate, Modifier.fillMaxWidth())
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text("Went to bed after midnight", style = MaterialTheme.typography.bodyMedium)
+                Switch(
+                    checked = state.wentToBedAfterMidnight,
+                    onCheckedChange = { viewModel.toggleAfterMidnight() },
+                )
+            }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 TimeField("In bed", state.inBed, viewModel::setInBed, Modifier.weight(1f))
                 TimeField("Asleep", state.asleep, viewModel::setAsleep, Modifier.weight(1f))
@@ -77,11 +95,6 @@ fun MorningScreen(
 
             HorizontalDivider()
             SectionLabel("Sleep quality")
-            NumberField(
-                label = "How long to fall asleep (min)",
-                value = state.perceivedLatencyMin,
-                onValueChange = viewModel::setPerceivedLatency,
-            )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 NumberField(
                     label = "Times awake",
