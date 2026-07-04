@@ -1,3 +1,6 @@
 # Normalise line endings: store and check out LF on every platform, so the
 # tracked shell hook (and all text) stays runnable on Linux.
 * text=auto eol=lf
+
+# The Gradle wrapper jar is a binary bootstrap — exclude from text conversion.
+gradle/wrapper/gradle-wrapper.jar binary

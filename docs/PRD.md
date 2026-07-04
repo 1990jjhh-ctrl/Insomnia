@@ -88,8 +88,9 @@ to Google Play and has no backend or cloud account.
 - Productivity (0–100%).
 - Alcohol consumed (see substances).
 - Day context (see below).
-- Day timeline of events (see below) — the core of the day's record.
-- Battery checkpoints across the day (see energy).
+- Day timeline of events (see below) — the core of the day's
+  record. Battery readings are events of type *battery checkpoint*
+  in this timeline (see energy).
 
 ### Substances (alcohol and medication)
 
@@ -114,15 +115,16 @@ to Google Play and has no backend or cloud account.
   replaces the former separate social-event and stress lists.
 - Each event has:
   - a type from an **event-type library**: standard types (work, shower,
-    walk, travel, meal, meeting, commute, nap, …) plus custom user types,
-    saved for reuse;
+    walk, travel, meal, meeting, commute, nap, battery checkpoint, …)
+    plus custom user types, saved for reuse;
   - a start and end time (a range);
   - a **stress range** (min–max %); equal min and max means a flat level;
   - optional **attendees** (people), enabling "who drains me" analysis;
-  - an optional note.
+  - an optional note;
+  - for *battery checkpoint* events: a **battery level** (0–100 %).
 - Naps are events of type *nap*; sleep stats locate them by type.
-- Per-event energy is not entered; it is derived from battery checkpoints
-  over the event's interval (see energy).
+- Per-event energy is derived from battery-checkpoint events over the
+  event's interval (see energy).
 
 ### Stress (derived)
 
@@ -136,14 +138,15 @@ to Google Play and has no backend or cloud account.
 
 ### Energy (battery)
 
-- Energy is tracked as **battery checkpoints**: timestamped readings of
-  battery remaining on the same 0–100% scale (0% empty, 100% full).
-- The user drops a few readings across the day rather than rating every
-  event; drain or recharge is derived between consecutive checkpoints.
+- Energy is tracked via **battery checkpoint events**: events of type
+  *battery checkpoint* that carry a timestamped % reading
+  (0 % empty, 100 % full), on the same scale as recovery and stress.
+- The user drops a few of these into the day timeline rather than rating
+  every event; drain or recharge is derived between consecutive ones.
 - An event's energy cost is the battery change over its interval, so
   events and battery correlate through time with no extra input.
-- The bedtime checkpoint is the day-end energy level and stands in for a
-  separate exhaustion field.
+- The last battery checkpoint of the day stands in for an exhaustion
+  field; no separate field is needed.
 
 ## Features
 
@@ -215,8 +218,8 @@ reminders.
 ## Storage notes
 
 - Normalised Room schema: entries, moods (+ a mood library), substances,
-  events (+ an event-type library) with attendees, battery checkpoints,
-  day-context tags, and alarm settings.
+  events (+ an event-type library) with attendees, day-context tags, and
+  alarm settings. Battery is stored as events (no separate table).
 - Timestamps stored as epoch values; enums as stable string codes.
 - Compactness comes from normalisation and integer/epoch encoding while
   remaining fully reconstructible (lossless).

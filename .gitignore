@@ -1,3 +1,12 @@
+# Android / Gradle
+.gradle/
+.kotlin/
+local.properties
+*.apk
+*.aab
+*.jks
+*.keystore
+
 # Byte-compiled / optimized / cache
 __pycache__/
 *.py[cod]
@@ -40,5 +49,5 @@ Thumbs.db
 *.sqlite
 *.sqlite3
 *.db
-data/
+/data/
 *.local.json

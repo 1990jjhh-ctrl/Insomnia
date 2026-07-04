@@ -10,4 +10,12 @@ else
     py=python3
 fi
 
-"$py" -c "from gitlint.cli import cli; cli()" --msg-filename "$1"
+"$py" -c "
+try:
+    from gitlint.cli import cli
+except ImportError:
+    import sys
+    print('gitlint not installed — skipping commit-msg lint', file=sys.stderr)
+    sys.exit(0)
+cli()
+" --msg-filename "$1"
