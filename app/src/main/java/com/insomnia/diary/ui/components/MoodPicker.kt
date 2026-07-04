@@ -17,6 +17,7 @@ fun MoodPicker(
     selected: List<Mood>,
     onToggle: (Mood) -> Unit,
     modifier: Modifier = Modifier,
+    extraMoods: List<Mood> = emptyList(),
 ) {
     FlowRow(
         modifier = modifier,
@@ -29,6 +30,13 @@ fun MoodPicker(
                 selected = selected.any { it.label == mood.label },
                 onClick = { onToggle(mood) },
                 label = { Text(preset.label) },
+            )
+        }
+        extraMoods.forEach { mood ->
+            FilterChip(
+                selected = selected.any { it.label == mood.label },
+                onClick = { onToggle(mood) },
+                label = { Text(mood.label) },
             )
         }
     }

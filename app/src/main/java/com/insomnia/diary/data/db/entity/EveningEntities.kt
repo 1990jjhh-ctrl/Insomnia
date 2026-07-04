@@ -71,6 +71,7 @@ data class DayEventEntity(
     val stressMin: Int,
     val stressMax: Int,
     val note: String?,
+    val batteryLevel: Int? = null,
 )
 
 @Entity(
@@ -89,27 +90,30 @@ data class AttendeeEntity(
     val name: String,
 )
 
-@Entity(
-    tableName = "battery_checkpoint",
-    foreignKeys = [ForeignKey(
-        entity = EveningEntryEntity::class,
-        parentColumns = ["id"],
-        childColumns = ["entryId"],
-        onDelete = ForeignKey.CASCADE,
-    )],
-    indices = [Index("entryId")],
-)
-data class BatteryCheckpointEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val entryId: Long,
-    val at: LocalDateTime,
-    val level: Int,
-)
-
 data class DayEventWithAttendees(
     @Embedded val event: DayEventEntity,
     @Relation(parentColumn = "id", entityColumn = "eventId")
     val attendees: List<AttendeeEntity>,
+)
+
+@Entity(
+    tableName = "custom_event_type",
+    indices = [Index(value = ["label"], unique = true)],
+)
+data class CustomEventTypeEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val label: String,
+)
+
+@Entity(
+    tableName = "custom_mood",
+    indices = [Index(value = ["label"], unique = true)],
+)
+data class CustomMoodEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val label: String,
+    val valence: Double = 0.0,
+    val arousal: Double = 0.0,
 )
 
 data class EveningEntryFull(
@@ -124,6 +128,4 @@ data class EveningEntryFull(
         entity = DayEventEntity::class,
     )
     val events: List<DayEventWithAttendees>,
-    @Relation(parentColumn = "id", entityColumn = "entryId")
-    val battery: List<BatteryCheckpointEntity>,
 )

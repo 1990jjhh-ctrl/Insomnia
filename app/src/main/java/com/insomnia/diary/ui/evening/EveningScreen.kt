@@ -29,18 +29,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.insomnia.diary.domain.Substance
+import com.insomnia.diary.ui.components.DateField
 import com.insomnia.diary.ui.components.MoodPicker
 import com.insomnia.diary.ui.components.PercentageSlider
-import com.insomnia.diary.ui.components.TimeField
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EveningScreen(
     onDone: () -> Unit,
-    viewModel: EveningViewModel = viewModel(),
+    viewModel: EveningViewModel,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(state.savedSuccessfully) { if (state.savedSuccessfully) onDone() }
@@ -51,11 +50,12 @@ fun EveningScreen(
             onDraftChange = viewModel::updateEventDraft,
             onSave = viewModel::saveEventDraft,
             onDismiss = viewModel::closeEventSheet,
+            customTypes = state.customTypes,
         )
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Evening Protocol") }) },
+        topBar = { TopAppBar(title = { Text(if (viewModel.isEditing) "Edit Evening" else "Evening Protocol") }) },
     ) { padding ->
         Column(
             modifier = Modifier
@@ -65,8 +65,13 @@ fun EveningScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Spacer(Modifier.height(4.dp))
+            DateField("Date", state.date, viewModel::setDate, Modifier.fillMaxWidth())
             SectionLabel("How are you feeling?")
-            MoodPicker(selected = state.moods, onToggle = viewModel::toggleMood)
+            MoodPicker(
+                selected = state.moods,
+                onToggle = viewModel::toggleMood,
+                extraMoods = state.customMoods,
+            )
 
             HorizontalDivider()
             PercentageSlider("Productivity", state.productivity, viewModel::setProductivity)
@@ -77,14 +82,6 @@ fun EveningScreen(
                 onAdd = viewModel::openNewEvent,
                 onEdit = viewModel::openEditEvent,
                 onRemove = viewModel::removeEvent,
-            )
-
-            HorizontalDivider()
-            BatterySection(
-                battery = state.battery,
-                onAdd = viewModel::addBattery,
-                onUpdate = viewModel::updateBattery,
-                onRemove = viewModel::removeBattery,
             )
 
             HorizontalDivider()
@@ -121,17 +118,13 @@ private fun EventsSection(
 ) {
     SectionLabel("Day timeline")
     events.forEachIndexed { i, e ->
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(e.typeLabel, style = MaterialTheme.typography.bodyMedium)
-                Text(
-                    "${e.start.format(TIME_FMT)}–${e.end.format(TIME_FMT)} · stress ${e.stressMin}–${e.stressMax}%",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                val detail = "${e.start.format(TIME_FMT)}–${e.end.format(TIME_FMT)} · " +
+                    "stress ${e.stressMin}–${e.stressMax}% · ${e.batteryLevel}%"
+                Text(detail, style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Row {
                 TextButton(onClick = { onEdit(i) }) { Text("Edit") }
@@ -143,38 +136,6 @@ private fun EventsSection(
 }
 
 @Composable
-private fun BatterySection(
-    battery: List<BatteryDraft>,
-    onAdd: () -> Unit,
-    onUpdate: (Int, BatteryDraft) -> Unit,
-    onRemove: (Int) -> Unit,
-) {
-    SectionLabel("Battery / energy checkpoints")
-    battery.forEachIndexed { i, b ->
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            TimeField(
-                label = "Time",
-                value = b.at,
-                onValueChange = { onUpdate(i, b.copy(at = it)) },
-                modifier = Modifier.weight(1f),
-            )
-            Column(modifier = Modifier.weight(2f)) {
-                PercentageSlider(
-                    label = "Level",
-                    value = b.level,
-                    onValueChange = { onUpdate(i, b.copy(level = it)) },
-                )
-            }
-            TextButton(onClick = { onRemove(i) }) { Text("×") }
-        }
-    }
-    TextButton(onClick = onAdd) { Text("+ Add checkpoint") }
-}
-
-@Composable
 private fun AlcoholSection(
     alcohol: List<Substance>,
     onAdd: (Substance) -> Unit,
@@ -182,10 +143,7 @@ private fun AlcoholSection(
 ) {
     SectionLabel("Alcohol")
     alcohol.forEachIndexed { i, sub ->
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("${sub.name}  ${sub.amount} ${sub.unit}", style = MaterialTheme.typography.bodyMedium)
             TextButton(onClick = { onRemove(i) }) { Text("Remove") }
         }
@@ -199,10 +157,13 @@ private fun AddSubstanceRow(onAdd: (Substance) -> Unit) {
     var amount by remember { mutableStateOf("") }
     var unit by remember { mutableStateOf("") }
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        OutlinedTextField(name, { name = it }, label = { Text("Name") }, singleLine = true, modifier = Modifier.weight(2f))
+        OutlinedTextField(name, { name = it }, label = { Text("Name") }, singleLine = true,
+            modifier = Modifier.weight(2f))
         OutlinedTextField(amount, { amount = it }, label = { Text("Amount") }, singleLine = true,
-            modifier = Modifier.weight(1f), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
-        OutlinedTextField(unit, { unit = it }, label = { Text("Unit") }, singleLine = true, modifier = Modifier.weight(1f))
+            modifier = Modifier.weight(1f),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
+        OutlinedTextField(unit, { unit = it }, label = { Text("Unit") }, singleLine = true,
+            modifier = Modifier.weight(1f))
     }
     val amountDouble = amount.toDoubleOrNull()
     if (name.isNotBlank() && amountDouble != null && unit.isNotBlank()) {
