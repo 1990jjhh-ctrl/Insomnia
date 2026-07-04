@@ -26,7 +26,19 @@ class MorningRepository(private val db: InsomniaDatabase) {
     fun observeLatest(): Flow<MorningProtocol?> =
         dao.observeLatest().map { it?.toDomain() }
 
+    suspend fun findById(id: Long): MorningProtocol? =
+        dao.findById(id)?.toDomain()
+
     suspend fun save(protocol: MorningProtocol) = db.withTransaction {
+        insertAll(protocol)
+    }
+
+    suspend fun update(id: Long, protocol: MorningProtocol) = db.withTransaction {
+        dao.deleteById(id)
+        insertAll(protocol)
+    }
+
+    private suspend fun insertAll(protocol: MorningProtocol) {
         val id = dao.insertEntry(protocol.toEntity())
         dao.insertMoods(protocol.moods.map { it.toEntity(id) })
         if (protocol.medication.isNotEmpty()) {
@@ -36,6 +48,7 @@ class MorningRepository(private val db: InsomniaDatabase) {
 }
 
 private fun MorningEntryFull.toDomain() = MorningProtocol(
+    id = entry.id,
     recordedAt = entry.recordedAt,
     moods = moods.map { Mood(it.label, it.valence, it.arousal) },
     recovery = Percentage(entry.recovery),

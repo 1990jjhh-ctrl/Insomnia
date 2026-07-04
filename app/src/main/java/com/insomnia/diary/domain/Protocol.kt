@@ -4,27 +4,24 @@ import java.time.Duration
 import java.time.LocalDateTime
 
 /**
- * Shared shape of every diary protocol.
- *
- * Being a sealed interface, a `when` over a [Protocol] is exhaustive: adding
- * a protocol forces every handler to acknowledge it. This is the Kotlin
- * replacement for the prototype's runtime entry-type registry.
+ * Shared shape of every diary protocol. [id] is null for unsaved entries and
+ * populated when loaded from storage.
  */
 sealed interface Protocol {
-    /** When the protocol was filled in. */
+    val id: Long?
     val recordedAt: LocalDateTime
-
-    /** Moods felt at the time (on waking, or before bed). */
     val moods: List<Mood>
 }
 
 /**
  * The morning protocol, recording the night just passed.
  *
- * Timestamps are absolute (date + time), so a night crossing midnight needs
- * no special handling and the ordering can be validated by callers.
+ * Timestamps are absolute (date + time) so a night crossing midnight needs
+ * no special handling. The ordering invariant inBed ≤ asleep ≤ wokeUp ≤
+ * outOfBed is enforced in [init].
  */
 data class MorningProtocol(
+    override val id: Long? = null,
     override val recordedAt: LocalDateTime,
     override val moods: List<Mood>,
     val recovery: Percentage,
@@ -37,6 +34,12 @@ data class MorningProtocol(
     val medication: List<Substance> = emptyList(),
     val dream: DreamRecall? = null,
 ) : Protocol {
+    init {
+        require(!asleep.isBefore(inBed)) { "asleep must not be before inBed" }
+        require(!wokeUp.isBefore(asleep)) { "wokeUp must not be before asleep" }
+        require(!outOfBed.isBefore(wokeUp)) { "outOfBed must not be before wokeUp" }
+    }
+
     /** Latency from getting into bed to falling asleep. */
     val timeToFallAsleep: Duration get() = Duration.between(inBed, asleep)
 
@@ -48,15 +51,17 @@ data class MorningProtocol(
 /**
  * The evening protocol, recording the day just passed.
  *
- * The day is captured as a timeline of [events] plus [battery] checkpoints;
- * stress and energy are derived from these (see docs/PRD.md). Day context
- * (day-type, location, tags) is still to be added.
+ * The day is captured as a timeline of [events]; [battery] is a convenience
+ * view of those events ordered by time with their energy levels.
  */
 data class EveningProtocol(
+    override val id: Long? = null,
     override val recordedAt: LocalDateTime,
     override val moods: List<Mood>,
     val productivity: Percentage,
     val alcohol: List<Substance> = emptyList(),
     val events: List<DayEvent> = emptyList(),
-    val battery: List<BatteryCheckpoint> = emptyList(),
-) : Protocol
+) : Protocol {
+    val battery: List<BatteryCheckpoint>
+        get() = events.sortedBy { it.start }.map { BatteryCheckpoint(it.start, it.batteryLevel) }
+}

@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.insomnia.diary.domain.EventTypePreset
@@ -38,8 +39,11 @@ fun EventEditorSheet(
     onDraftChange: (EventDraft) -> Unit,
     onSave: () -> Unit,
     onDismiss: () -> Unit,
+    customTypes: List<String> = emptyList(),
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showCustomInput by remember { mutableStateOf(false) }
+    var customInputText by remember { mutableStateOf("") }
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(
@@ -49,7 +53,6 @@ fun EventEditorSheet(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text("Event", style = MaterialTheme.typography.titleMedium)
-
             Text("Type", style = MaterialTheme.typography.labelMedium)
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -58,35 +61,70 @@ fun EventEditorSheet(
                 EventTypePreset.entries.forEach { preset ->
                     FilterChip(
                         selected = draft.typeLabel == preset.label && !draft.isCustom,
-                        onClick = { onDraftChange(draft.copy(typeLabel = preset.label, isCustom = false)) },
+                        onClick = {
+                            showCustomInput = false
+                            onDraftChange(draft.copy(typeLabel = preset.label, isCustom = false))
+                        },
                         label = { Text(preset.label) },
                     )
                 }
-                FilterChip(
-                    selected = draft.isCustom,
-                    onClick = { onDraftChange(draft.copy(isCustom = true, typeLabel = "")) },
-                    label = { Text("Custom…") },
-                )
+                customTypes.forEach { label ->
+                    FilterChip(
+                        selected = draft.isCustom && draft.typeLabel == label,
+                        onClick = {
+                            showCustomInput = false
+                            onDraftChange(draft.copy(typeLabel = label, isCustom = true))
+                        },
+                        label = { Text(label) },
+                    )
+                }
+                TextButton(onClick = {
+                    showCustomInput = true
+                    customInputText = ""
+                    onDraftChange(draft.copy(isCustom = true, typeLabel = ""))
+                }) { Text("(+)") }
             }
-            if (draft.isCustom) {
-                OutlinedTextField(
-                    value = draft.typeLabel,
-                    onValueChange = { onDraftChange(draft.copy(typeLabel = it)) },
-                    label = { Text("Custom type name") },
-                    singleLine = true,
+            if (showCustomInput) {
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                )
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    OutlinedTextField(
+                        value = customInputText,
+                        onValueChange = {
+                            customInputText = it
+                            onDraftChange(draft.copy(typeLabel = it.trim(), isCustom = true))
+                        },
+                        label = { Text("New tag") },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+                    )
+                    TextButton(
+                        onClick = { showCustomInput = false },
+                        enabled = customInputText.isNotBlank(),
+                    ) { Text("Done") }
+                }
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 TimeField("Start", draft.start, { onDraftChange(draft.copy(start = it)) }, Modifier.weight(1f))
                 TimeField("End", draft.end, { onDraftChange(draft.copy(end = it)) }, Modifier.weight(1f))
             }
-
             Text("Stress range", style = MaterialTheme.typography.labelMedium)
-            PercentageSlider("Min", draft.stressMin, { onDraftChange(draft.copy(stressMin = it.coerceAtMost(draft.stressMax))) })
-            PercentageSlider("Max", draft.stressMax, { onDraftChange(draft.copy(stressMax = it.coerceAtLeast(draft.stressMin))) })
-
+            PercentageSlider(
+                "Min", draft.stressMin,
+                { onDraftChange(draft.copy(stressMin = it.coerceAtMost(draft.stressMax))) },
+            )
+            PercentageSlider(
+                "Max", draft.stressMax,
+                { onDraftChange(draft.copy(stressMax = it.coerceAtLeast(draft.stressMin))) },
+            )
+            PercentageSlider(
+                label = "Battery level",
+                value = draft.batteryLevel,
+                onValueChange = { onDraftChange(draft.copy(batteryLevel = it)) },
+            )
             OutlinedTextField(
                 value = draft.attendeesText,
                 onValueChange = { onDraftChange(draft.copy(attendeesText = it)) },
@@ -94,6 +132,7 @@ fun EventEditorSheet(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
+
             OutlinedTextField(
                 value = draft.note,
                 onValueChange = { onDraftChange(draft.copy(note = it)) },
@@ -103,10 +142,7 @@ fun EventEditorSheet(
             )
 
             val canSave = draft.typeLabel.isNotBlank() && !draft.end.isBefore(draft.start)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 TextButton(onClick = onDismiss) { Text("Cancel") }
                 Button(onClick = onSave, enabled = canSave) { Text("Save event") }
             }

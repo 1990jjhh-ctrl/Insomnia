@@ -30,6 +30,13 @@ interface MorningDao {
     @Insert
     suspend fun insertMedication(medication: List<MorningMedicationEntity>)
 
+    @Transaction
+    @Query("SELECT * FROM morning_entry WHERE id = :id")
+    suspend fun findById(id: Long): MorningEntryFull?
+
     @Delete
     suspend fun deleteEntry(entry: MorningEntryEntity)
+
+    @Query("DELETE FROM morning_entry WHERE id = :id")
+    suspend fun deleteById(id: Long)
 }

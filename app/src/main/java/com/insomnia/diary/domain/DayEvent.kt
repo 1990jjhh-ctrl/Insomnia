@@ -62,14 +62,15 @@ data class Attendee(val name: String)
 
 /**
  * One entry on the day's timeline: something done over a time span, with the
- * [stress] it carried and who was there. Energy is not stored here; it is
- * derived from battery checkpoints over [start]..[end].
+ * [stress] it carried, who was there, and the user's energy [batteryLevel]
+ * at that moment (0–100%).
  */
 data class DayEvent(
     val type: EventType,
     val start: LocalDateTime,
     val end: LocalDateTime,
     val stress: StressRange,
+    val batteryLevel: Percentage,
     val attendees: List<Attendee> = emptyList(),
     val note: String? = null,
 ) {
