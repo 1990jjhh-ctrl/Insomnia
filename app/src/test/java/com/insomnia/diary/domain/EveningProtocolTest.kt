@@ -6,15 +6,15 @@ import org.junit.Test
 import java.time.LocalDateTime
 
 class EveningProtocolTest {
-
     private val base = LocalDateTime.of(2024, 1, 15, 9, 0)
 
-    private fun protocol(events: List<DayEvent> = emptyList()) = EveningProtocol(
-        recordedAt = base,
-        moods = emptyList(),
-        productivity = Percentage(70),
-        events = events,
-    )
+    private fun protocol(events: List<DayEvent> = emptyList()) =
+        EveningProtocol(
+            recordedAt = base,
+            moods = emptyList(),
+            productivity = Percentage(70),
+            events = events,
+        )
 
     private fun event(
         start: LocalDateTime,

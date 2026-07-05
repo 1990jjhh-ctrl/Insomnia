@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -50,13 +49,18 @@ fun MorningScreen(
     LaunchedEffect(state.savedSuccessfully) { if (state.savedSuccessfully) onDone() }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text(if (viewModel.isEditing) "Edit Morning" else "Morning Protocol") }) },
+        topBar = {
+            TopAppBar(
+                title = { Text(if (viewModel.isEditing) "Edit Morning" else "Morning Protocol") },
+            )
+        },
     ) { padding ->
         Column(
-            modifier = Modifier
-                .padding(padding)
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState()),
+            modifier =
+                Modifier
+                    .padding(padding)
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Spacer(Modifier.height(4.dp))
@@ -201,8 +205,10 @@ private fun MedicationSection(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text("${sub.name}  ${sub.amount} ${sub.unit}",
-                style = MaterialTheme.typography.bodyMedium)
+            Text(
+                "${sub.name}  ${sub.amount} ${sub.unit}",
+                style = MaterialTheme.typography.bodyMedium,
+            )
             TextButton(onClick = { onRemove(i) }) { Text("Remove") }
         }
     }
@@ -219,19 +225,36 @@ private fun AddSubstanceRow(onAdd: (Substance) -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        OutlinedTextField(name, { name = it }, label = { Text("Name") }, singleLine = true,
-            modifier = Modifier.weight(2f))
-        OutlinedTextField(amount, { amount = it }, label = { Text("Amount") }, singleLine = true,
+        OutlinedTextField(
+            name,
+            { name = it },
+            label = { Text("Name") },
+            singleLine = true,
+            modifier = Modifier.weight(2f),
+        )
+        OutlinedTextField(
+            amount,
+            { amount = it },
+            label = { Text("Amount") },
+            singleLine = true,
             modifier = Modifier.weight(1f),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
-        OutlinedTextField(unit, { unit = it }, label = { Text("Unit") }, singleLine = true,
-            modifier = Modifier.weight(1f))
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+        )
+        OutlinedTextField(
+            unit,
+            { unit = it },
+            label = { Text("Unit") },
+            singleLine = true,
+            modifier = Modifier.weight(1f),
+        )
     }
     val amountDouble = amount.toDoubleOrNull()
     if (name.isNotBlank() && amountDouble != null && unit.isNotBlank()) {
         TextButton(onClick = {
             onAdd(Substance(name.trim(), amountDouble, unit.trim()))
-            name = ""; amount = ""; unit = ""
+            name = ""
+            amount = ""
+            unit = ""
         }) { Text("+ Add") }
     }
 }

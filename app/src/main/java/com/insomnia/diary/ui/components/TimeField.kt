@@ -29,11 +29,12 @@ fun TimeField(
     modifier: Modifier = Modifier,
 ) {
     var showPicker by remember { mutableStateOf(false) }
-    val state = rememberTimePickerState(
-        initialHour = value.hour,
-        initialMinute = value.minute,
-        is24Hour = true,
-    )
+    val state =
+        rememberTimePickerState(
+            initialHour = value.hour,
+            initialMinute = value.minute,
+            is24Hour = true,
+        )
 
     Box(modifier = modifier) {
         OutlinedTextField(
@@ -44,9 +45,10 @@ fun TimeField(
             enabled = false,
         )
         Box(
-            modifier = Modifier
-                .matchParentSize()
-                .clickable { showPicker = true },
+            modifier =
+                Modifier
+                    .matchParentSize()
+                    .clickable { showPicker = true },
         )
     }
 

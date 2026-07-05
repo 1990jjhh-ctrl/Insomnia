@@ -27,14 +27,28 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
+private const val DEFAULT_INBED_HOUR = 23
+private const val DEFAULT_ASLEEP_MINUTE = 30
+
 data class MorningFormState(
     val moods: List<Mood> = emptyList(),
     val customMoods: List<Mood> = emptyList(),
     val recovery: Int = 70,
-    val inBed: LocalDateTime = LocalDate.now().minusDays(1).atTime(23, 0),
-    val asleep: LocalDateTime = LocalDate.now().minusDays(1).atTime(23, 30),
-    val wokeUp: LocalDateTime = LocalDate.now().atTime(LocalTime.now().hour, LocalTime.now().minute),
-    val outOfBed: LocalDateTime = LocalDate.now().atTime(LocalTime.now().hour, LocalTime.now().minute),
+    val inBed: LocalDateTime = LocalDate.now().minusDays(1).atTime(DEFAULT_INBED_HOUR, 0),
+    val asleep: LocalDateTime =
+        LocalDate.now().minusDays(
+            1,
+        ).atTime(DEFAULT_INBED_HOUR, DEFAULT_ASLEEP_MINUTE),
+    val wokeUp: LocalDateTime =
+        LocalDate.now().atTime(
+            LocalTime.now().hour,
+            LocalTime.now().minute,
+        ),
+    val outOfBed: LocalDateTime =
+        LocalDate.now().atTime(
+            LocalTime.now().hour,
+            LocalTime.now().minute,
+        ),
     val awakeCount: Int = 0,
     val totalAwakeMin: Int = 0,
     val medication: List<Substance> = emptyList(),
@@ -48,20 +62,21 @@ data class MorningFormState(
     val wentToBedAfterMidnight: Boolean get() = inBed.toLocalDate() == wokeUp.toLocalDate()
 
     companion object {
-        fun from(p: MorningProtocol) = MorningFormState(
-            moods = p.moods,
-            recovery = p.recovery.value,
-            inBed = p.inBed,
-            asleep = p.asleep,
-            wokeUp = p.wokeUp,
-            outOfBed = p.outOfBed,
-            awakeCount = p.awakeEvents.count,
-            totalAwakeMin = p.awakeEvents.totalAwake.toMinutes().toInt(),
-            medication = p.medication,
-            dreamType = p.dream?.type,
-            dreamNote = p.dream?.note ?: "",
-            recordedAt = p.recordedAt,
-        )
+        fun from(p: MorningProtocol) =
+            MorningFormState(
+                moods = p.moods,
+                recovery = p.recovery.value,
+                inBed = p.inBed,
+                asleep = p.asleep,
+                wokeUp = p.wokeUp,
+                outOfBed = p.outOfBed,
+                awakeCount = p.awakeEvents.count,
+                totalAwakeMin = p.awakeEvents.totalAwake.toMinutes().toInt(),
+                medication = p.medication,
+                dreamType = p.dream?.type,
+                dreamNote = p.dream?.note ?: "",
+                recordedAt = p.recordedAt,
+            )
     }
 }
 
@@ -85,68 +100,98 @@ class MorningViewModel(app: Application, private val entryId: Long?) : AndroidVi
         }
     }
 
-    fun toggleMood(mood: Mood) = _state.update { s ->
-        val exists = s.moods.any { it.label == mood.label }
-        s.copy(moods = if (exists) s.moods.filter { it.label != mood.label } else s.moods + mood)
-    }
+    fun toggleMood(mood: Mood) =
+        _state.update { s ->
+            val exists = s.moods.any { it.label == mood.label }
+            s.copy(
+                moods = if (exists) s.moods.filter { it.label != mood.label } else s.moods + mood,
+            )
+        }
 
-    fun setDate(d: LocalDate) = _state.update { s ->
-        val delta = ChronoUnit.DAYS.between(s.date, d)
-        if (delta == 0L) return@update s
-        s.copy(
-            inBed = s.inBed.plusDays(delta),
-            asleep = s.asleep.plusDays(delta),
-            wokeUp = s.wokeUp.plusDays(delta),
-            outOfBed = s.outOfBed.plusDays(delta),
-        )
-    }
+    fun setDate(d: LocalDate) =
+        _state.update { s ->
+            val delta = ChronoUnit.DAYS.between(s.date, d)
+            if (delta == 0L) return@update s
+            s.copy(
+                inBed = s.inBed.plusDays(delta),
+                asleep = s.asleep.plusDays(delta),
+                wokeUp = s.wokeUp.plusDays(delta),
+                outOfBed = s.outOfBed.plusDays(delta),
+            )
+        }
 
     fun setRecovery(v: Int) = _state.update { it.copy(recovery = v) }
+
     fun setInBed(v: LocalDateTime) = _state.update { it.copy(inBed = v) }
+
     fun setAsleep(v: LocalDateTime) = _state.update { it.copy(asleep = v) }
+
     fun setWokeUp(v: LocalDateTime) = _state.update { it.copy(wokeUp = v) }
+
     fun setOutOfBed(v: LocalDateTime) = _state.update { it.copy(outOfBed = v) }
 
-    fun toggleAfterMidnight() = _state.update { s ->
-        val shift = if (s.wentToBedAfterMidnight) -1L else 1L
-        s.copy(inBed = s.inBed.plusDays(shift), asleep = s.asleep.plusDays(shift))
-    }
+    fun toggleAfterMidnight() =
+        _state.update { s ->
+            val shift = if (s.wentToBedAfterMidnight) -1L else 1L
+            s.copy(inBed = s.inBed.plusDays(shift), asleep = s.asleep.plusDays(shift))
+        }
 
     fun setAwakeCount(v: Int) = _state.update { it.copy(awakeCount = v.coerceAtLeast(0)) }
+
     fun setTotalAwake(v: Int) = _state.update { it.copy(totalAwakeMin = v.coerceAtLeast(0)) }
+
     fun addMedication(s: Substance) = _state.update { it.copy(medication = it.medication + s) }
+
     fun removeMedication(i: Int) =
-        _state.update { it.copy(medication = it.medication.toMutableList().also { l -> l.removeAt(i) }) }
+        _state.update { s ->
+            s.copy(medication = s.medication.toMutableList().also { it.removeAt(i) })
+        }
+
     fun setDreamType(d: Dream?) = _state.update { it.copy(dreamType = d) }
+
     fun setDreamNote(n: String) = _state.update { it.copy(dreamNote = n) }
 
     fun save() {
         val s = _state.value
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true) }
-            val protocol = MorningProtocol(
-                recordedAt = if (entryId != null) s.recordedAt else LocalDateTime.now(),
-                moods = s.moods,
-                recovery = Percentage(s.recovery),
-                inBed = s.inBed,
-                outOfBed = s.outOfBed,
-                asleep = s.asleep,
-                wokeUp = s.wokeUp,
-                perceivedSleepLatency = Duration.between(s.inBed, s.asleep).coerceAtLeast(Duration.ZERO),
-                awakeEvents = AwakeEvents(s.awakeCount, Duration.ofMinutes(s.totalAwakeMin.toLong())),
-                medication = s.medication,
-                dream = s.dreamType?.let { DreamRecall(it, s.dreamNote.ifBlank { null }) },
-            )
+            val protocol =
+                MorningProtocol(
+                    recordedAt = if (entryId != null) s.recordedAt else LocalDateTime.now(),
+                    moods = s.moods,
+                    recovery = Percentage(s.recovery),
+                    inBed = s.inBed,
+                    outOfBed = s.outOfBed,
+                    asleep = s.asleep,
+                    wokeUp = s.wokeUp,
+                    perceivedSleepLatency =
+                        Duration.between(
+                            s.inBed,
+                            s.asleep,
+                        ).coerceAtLeast(Duration.ZERO),
+                    awakeEvents =
+                        AwakeEvents(
+                            s.awakeCount,
+                            Duration.ofMinutes(s.totalAwakeMin.toLong()),
+                        ),
+                    medication = s.medication,
+                    dream = s.dreamType?.let { DreamRecall(it, s.dreamNote.ifBlank { null }) },
+                )
             if (entryId != null) repo.update(entryId, protocol) else repo.save(protocol)
             _state.update { it.copy(isSaving = false, savedSuccessfully = true) }
         }
     }
 
     companion object {
-        fun factory(app: Application, entryId: Long?) = object : ViewModelProvider.Factory {
+        fun factory(
+            app: Application,
+            entryId: Long?,
+        ) = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T =
-                MorningViewModel(app, entryId) as T
+            override fun <T : ViewModel> create(
+                modelClass: Class<T>,
+                extras: CreationExtras,
+            ): T = MorningViewModel(app, entryId) as T
         }
     }
 }

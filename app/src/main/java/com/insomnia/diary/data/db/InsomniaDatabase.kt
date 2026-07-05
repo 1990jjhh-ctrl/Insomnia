@@ -39,63 +39,68 @@ import com.insomnia.diary.data.db.entity.MorningMoodEntity
 @TypeConverters(Converters::class)
 abstract class InsomniaDatabase : RoomDatabase() {
     abstract fun morningDao(): MorningDao
+
     abstract fun eveningDao(): EveningDao
 
     companion object {
         @Volatile private var instance: InsomniaDatabase? = null
 
-        private val MIGRATION_1_2 = object : Migration(1, 2) {
-            override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("ALTER TABLE day_event ADD COLUMN batteryLevel INTEGER")
-                db.execSQL("DROP TABLE IF EXISTS battery_checkpoint")
+        private val MIGRATION_1_2 =
+            object : Migration(1, 2) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL("ALTER TABLE day_event ADD COLUMN batteryLevel INTEGER")
+                    db.execSQL("DROP TABLE IF EXISTS battery_checkpoint")
+                }
             }
-        }
 
-        private val MIGRATION_2_3 = object : Migration(2, 3) {
-            override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("UPDATE day_event SET batteryLevel = 70 WHERE batteryLevel IS NULL")
+        private val MIGRATION_2_3 =
+            object : Migration(2, 3) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL("UPDATE day_event SET batteryLevel = 70 WHERE batteryLevel IS NULL")
+                }
             }
-        }
 
-        private val MIGRATION_3_4 = object : Migration(3, 4) {
-            override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL(
-                    "CREATE TABLE IF NOT EXISTS custom_event_type (" +
-                        "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
-                        "label TEXT NOT NULL" +
-                        ")"
-                )
-                db.execSQL(
-                    "CREATE UNIQUE INDEX IF NOT EXISTS " +
-                        "`index_custom_event_type_label` " +
-                        "ON `custom_event_type` (`label`)"
-                )
+        private val MIGRATION_3_4 =
+            object : Migration(3, 4) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        "CREATE TABLE IF NOT EXISTS custom_event_type (" +
+                            "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                            "label TEXT NOT NULL" +
+                            ")",
+                    )
+                    db.execSQL(
+                        "CREATE UNIQUE INDEX IF NOT EXISTS " +
+                            "`index_custom_event_type_label` " +
+                            "ON `custom_event_type` (`label`)",
+                    )
+                }
             }
-        }
 
-        private val MIGRATION_4_5 = object : Migration(4, 5) {
-            override fun migrate(db: SupportSQLiteDatabase) {
-                // Retroactively add the named index that MIGRATION_3_4 missed.
-                db.execSQL(
-                    "CREATE UNIQUE INDEX IF NOT EXISTS " +
-                        "`index_custom_event_type_label` " +
-                        "ON `custom_event_type` (`label`)"
-                )
-                db.execSQL(
-                    "CREATE TABLE IF NOT EXISTS custom_mood (" +
-                        "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
-                        "label TEXT NOT NULL, " +
-                        "valence REAL NOT NULL DEFAULT 0.0, " +
-                        "arousal REAL NOT NULL DEFAULT 0.0" +
-                        ")"
-                )
-                db.execSQL(
-                    "CREATE UNIQUE INDEX IF NOT EXISTS " +
-                        "`index_custom_mood_label` " +
-                        "ON `custom_mood` (`label`)"
-                )
+        private val MIGRATION_4_5 =
+            object : Migration(4, 5) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    // Retroactively add the named index that MIGRATION_3_4 missed.
+                    db.execSQL(
+                        "CREATE UNIQUE INDEX IF NOT EXISTS " +
+                            "`index_custom_event_type_label` " +
+                            "ON `custom_event_type` (`label`)",
+                    )
+                    db.execSQL(
+                        "CREATE TABLE IF NOT EXISTS custom_mood (" +
+                            "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                            "label TEXT NOT NULL, " +
+                            "valence REAL NOT NULL DEFAULT 0.0, " +
+                            "arousal REAL NOT NULL DEFAULT 0.0" +
+                            ")",
+                    )
+                    db.execSQL(
+                        "CREATE UNIQUE INDEX IF NOT EXISTS " +
+                            "`index_custom_mood_label` " +
+                            "ON `custom_mood` (`label`)",
+                    )
+                }
             }
-        }
 
         fun getInstance(context: Context): InsomniaDatabase =
             instance ?: synchronized(this) {

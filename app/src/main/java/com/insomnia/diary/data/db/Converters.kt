@@ -7,11 +7,16 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 class Converters {
-    @TypeConverter fun fromLocalDateTime(v: LocalDateTime?): Long? =
-        v?.toInstant(ZoneOffset.UTC)?.toEpochMilli()
+    @TypeConverter
+    fun fromLocalDateTime(v: LocalDateTime?): Long? = v?.toInstant(ZoneOffset.UTC)?.toEpochMilli()
 
     @TypeConverter fun toLocalDateTime(v: Long?): LocalDateTime? =
-        v?.let { LocalDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneOffset.UTC) }
+        v?.let {
+            LocalDateTime.ofInstant(
+                Instant.ofEpochMilli(it),
+                ZoneOffset.UTC,
+            )
+        }
 
     @TypeConverter fun fromDuration(v: Duration?): Long? = v?.seconds
 

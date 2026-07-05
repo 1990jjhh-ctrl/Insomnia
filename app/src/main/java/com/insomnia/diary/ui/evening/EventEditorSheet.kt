@@ -47,9 +47,10 @@ fun EventEditorSheet(
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState()),
+            modifier =
+                Modifier
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text("Event", style = MaterialTheme.typography.titleMedium)
@@ -108,16 +109,28 @@ fun EventEditorSheet(
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TimeField("Start", draft.start, { onDraftChange(draft.copy(start = it)) }, Modifier.weight(1f))
-                TimeField("End", draft.end, { onDraftChange(draft.copy(end = it)) }, Modifier.weight(1f))
+                TimeField(
+                    "Start",
+                    draft.start,
+                    { onDraftChange(draft.copy(start = it)) },
+                    Modifier.weight(1f),
+                )
+                TimeField(
+                    "End",
+                    draft.end,
+                    { onDraftChange(draft.copy(end = it)) },
+                    Modifier.weight(1f),
+                )
             }
             Text("Stress range", style = MaterialTheme.typography.labelMedium)
             PercentageSlider(
-                "Min", draft.stressMin,
+                "Min",
+                draft.stressMin,
                 { onDraftChange(draft.copy(stressMin = it.coerceAtMost(draft.stressMax))) },
             )
             PercentageSlider(
-                "Max", draft.stressMax,
+                "Max",
+                draft.stressMax,
                 { onDraftChange(draft.copy(stressMax = it.coerceAtLeast(draft.stressMin))) },
             )
             PercentageSlider(

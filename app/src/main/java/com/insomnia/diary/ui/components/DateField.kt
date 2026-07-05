@@ -31,9 +31,13 @@ fun DateField(
     modifier: Modifier = Modifier,
 ) {
     var showPicker by remember { mutableStateOf(false) }
-    val pickerState = rememberDatePickerState(
-        initialSelectedDateMillis = value.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
-    )
+    val pickerState =
+        rememberDatePickerState(
+            initialSelectedDateMillis =
+                value.atStartOfDay(
+                    ZoneOffset.UTC,
+                ).toInstant().toEpochMilli(),
+        )
 
     Box(modifier = modifier) {
         OutlinedTextField(
@@ -53,7 +57,9 @@ fun DateField(
                 TextButton(onClick = {
                     showPicker = false
                     pickerState.selectedDateMillis?.let { millis ->
-                        onValueChange(Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate())
+                        onValueChange(
+                            Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate(),
+                        )
                     }
                 }) { Text("OK") }
             },

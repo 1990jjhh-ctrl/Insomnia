@@ -5,7 +5,6 @@ import org.junit.Assert.assertThrows
 import org.junit.Test
 
 class MoodTest {
-
     @Test
     fun mood_acceptsValidCoordinates() {
         val m = Mood("neutral", 0.0, 0.0)

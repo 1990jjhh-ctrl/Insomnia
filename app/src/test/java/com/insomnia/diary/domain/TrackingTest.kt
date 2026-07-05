@@ -5,7 +5,6 @@ import org.junit.Assert.assertThrows
 import org.junit.Test
 
 class TrackingTest {
-
     @Test
     fun percentage_acceptsZero() {
         assertEquals(0, Percentage(0).value)
