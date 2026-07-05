@@ -28,8 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.insomnia.diary.domain.EveningProtocol
-import com.insomnia.diary.domain.MorningProtocol
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -51,65 +49,76 @@ fun HomeScreen(
     val history by viewModel.history.collectAsStateWithLifecycle(emptyList())
 
     Scaffold { innerPadding ->
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding)
-            .padding(24.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(24.dp)
+                    .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text("Insomnia", style = MaterialTheme.typography.headlineLarge)
-            IconButton(onClick = onSettings) {
-                Icon(Icons.Filled.Settings, contentDescription = "Settings")
-            }
-        }
-        Text(
-            text = LocalDate.now().let { d ->
-                "${d.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())}, " +
-                    "${d.dayOfMonth} ${d.month.getDisplayName(TextStyle.FULL, Locale.getDefault())}"
-            },
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-        ProtocolCard(
-            title = "Morning Protocol",
-            latest = latestMorning,
-            summary = { "Recovery ${it.recovery.value}% · ${formatDuration(it)}" },
-            onStart = onStartMorning,
-        )
-        ProtocolCard(
-            title = "Evening Protocol",
-            latest = latestEvening,
-            summary = { "Productivity ${it.productivity.value}% · ${it.events.size} events" },
-            onStart = onStartEvening,
-        )
-
-        if (history.isNotEmpty()) {
-            HorizontalDivider()
-            Text(
-                "History",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                history.forEach { entry ->
-                    HistoryRow(
-                        entry = entry,
-                        onEdit = { if (entry.isMorning) onEditMorning(entry.id) else onEditEvening(entry.id) },
-                    )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text("Insomnia", style = MaterialTheme.typography.headlineLarge)
+                IconButton(onClick = onSettings) {
+                    Icon(Icons.Filled.Settings, contentDescription = "Settings")
                 }
             }
+            Text(
+                text =
+                    LocalDate.now().let { d ->
+                        "${d.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())}, " +
+                            "${d.dayOfMonth} " +
+                            "${d.month.getDisplayName(TextStyle.FULL, Locale.getDefault())}"
+                    },
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+            ProtocolCard(
+                title = "Morning Protocol",
+                latest = latestMorning,
+                summary = { "Recovery ${it.recovery.value}% · ${formatDuration(it)}" },
+                onStart = onStartMorning,
+            )
+            ProtocolCard(
+                title = "Evening Protocol",
+                latest = latestEvening,
+                summary = { "Productivity ${it.productivity.value}% · ${it.events.size} events" },
+                onStart = onStartEvening,
+            )
+
+            if (history.isNotEmpty()) {
+                HorizontalDivider()
+                Text(
+                    "History",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    history.forEach { entry ->
+                        HistoryRow(
+                            entry = entry,
+                            onEdit = {
+                                if (entry.isMorning) {
+                                    onEditMorning(
+                                        entry.id,
+                                    )
+                                } else {
+                                    onEditEvening(entry.id)
+                                }
+                            },
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
         }
-        Spacer(modifier = Modifier.height(8.dp))
-    }
     } // Scaffold
 }
 
@@ -144,12 +153,16 @@ private fun <T> ProtocolCard(
 }
 
 @Composable
-private fun HistoryRow(entry: HistoryEntry, onEdit: () -> Unit) {
+private fun HistoryRow(
+    entry: HistoryEntry,
+    onEdit: () -> Unit,
+) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {

@@ -27,35 +27,38 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     val latestMorning: Flow<MorningProtocol?> = morningRepo.observeLatest()
     val latestEvening: Flow<EveningProtocol?> = eveningRepo.observeLatest()
 
-    val history: Flow<List<HistoryEntry>> = combine(
-        morningRepo.observeAll(),
-        eveningRepo.observeAll(),
-    ) { morning, evening ->
-        val morningEntries = morning.mapNotNull { p ->
-            p.id?.let { id ->
-                HistoryEntry(
-                    id = id,
-                    recordedAt = p.recordedAt,
-                    label = "Morning",
-                    summary = "${p.recovery.value}% recovery · ${formatDuration(p)}",
-                    isMorning = true,
-                )
-            }
+    val history: Flow<List<HistoryEntry>> =
+        combine(
+            morningRepo.observeAll(),
+            eveningRepo.observeAll(),
+        ) { morning, evening ->
+            val morningEntries =
+                morning.mapNotNull { p ->
+                    p.id?.let { id ->
+                        HistoryEntry(
+                            id = id,
+                            recordedAt = p.recordedAt,
+                            label = "Morning",
+                            summary = "${p.recovery.value}% recovery · ${formatDuration(p)}",
+                            isMorning = true,
+                        )
+                    }
+                }
+            val eveningEntries =
+                evening.mapNotNull { p ->
+                    p.id?.let { id ->
+                        val eventCount = p.events.size
+                        HistoryEntry(
+                            id = id,
+                            recordedAt = p.recordedAt,
+                            label = "Evening",
+                            summary = "${p.productivity.value}% productivity · $eventCount events",
+                            isMorning = false,
+                        )
+                    }
+                }
+            (morningEntries + eveningEntries).sortedByDescending { it.recordedAt }
         }
-        val eveningEntries = evening.mapNotNull { p ->
-            p.id?.let { id ->
-                val eventCount = p.events.size
-                HistoryEntry(
-                    id = id,
-                    recordedAt = p.recordedAt,
-                    label = "Evening",
-                    summary = "${p.productivity.value}% productivity · $eventCount events",
-                    isMorning = false,
-                )
-            }
-        }
-        (morningEntries + eveningEntries).sortedByDescending { it.recordedAt }
-    }
 }
 
 internal fun formatDuration(p: MorningProtocol): String {

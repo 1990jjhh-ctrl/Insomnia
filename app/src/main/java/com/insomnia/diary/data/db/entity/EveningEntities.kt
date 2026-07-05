@@ -17,12 +17,14 @@ data class EveningEntryEntity(
 
 @Entity(
     tableName = "evening_mood",
-    foreignKeys = [ForeignKey(
-        entity = EveningEntryEntity::class,
-        parentColumns = ["id"],
-        childColumns = ["entryId"],
-        onDelete = ForeignKey.CASCADE,
-    )],
+    foreignKeys = [
+        ForeignKey(
+            entity = EveningEntryEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["entryId"],
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
     indices = [Index("entryId")],
 )
 data class EveningMoodEntity(
@@ -35,12 +37,14 @@ data class EveningMoodEntity(
 
 @Entity(
     tableName = "evening_alcohol",
-    foreignKeys = [ForeignKey(
-        entity = EveningEntryEntity::class,
-        parentColumns = ["id"],
-        childColumns = ["entryId"],
-        onDelete = ForeignKey.CASCADE,
-    )],
+    foreignKeys = [
+        ForeignKey(
+            entity = EveningEntryEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["entryId"],
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
     indices = [Index("entryId")],
 )
 data class EveningAlcoholEntity(
@@ -53,12 +57,14 @@ data class EveningAlcoholEntity(
 
 @Entity(
     tableName = "day_event",
-    foreignKeys = [ForeignKey(
-        entity = EveningEntryEntity::class,
-        parentColumns = ["id"],
-        childColumns = ["entryId"],
-        onDelete = ForeignKey.CASCADE,
-    )],
+    foreignKeys = [
+        ForeignKey(
+            entity = EveningEntryEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["entryId"],
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
     indices = [Index("entryId")],
 )
 data class DayEventEntity(
@@ -76,12 +82,14 @@ data class DayEventEntity(
 
 @Entity(
     tableName = "event_attendee",
-    foreignKeys = [ForeignKey(
-        entity = DayEventEntity::class,
-        parentColumns = ["id"],
-        childColumns = ["eventId"],
-        onDelete = ForeignKey.CASCADE,
-    )],
+    foreignKeys = [
+        ForeignKey(
+            entity = DayEventEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["eventId"],
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
     indices = [Index("eventId")],
 )
 data class AttendeeEntity(

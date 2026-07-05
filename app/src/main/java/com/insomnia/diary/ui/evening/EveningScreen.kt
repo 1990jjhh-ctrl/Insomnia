@@ -55,13 +55,18 @@ fun EveningScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text(if (viewModel.isEditing) "Edit Evening" else "Evening Protocol") }) },
+        topBar = {
+            TopAppBar(
+                title = { Text(if (viewModel.isEditing) "Edit Evening" else "Evening Protocol") },
+            )
+        },
     ) { padding ->
         Column(
-            modifier = Modifier
-                .padding(padding)
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState()),
+            modifier =
+                Modifier
+                    .padding(padding)
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Spacer(Modifier.height(4.dp))
@@ -121,10 +126,14 @@ private fun EventsSection(
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(e.typeLabel, style = MaterialTheme.typography.bodyMedium)
-                val detail = "${e.start.format(TIME_FMT)}–${e.end.format(TIME_FMT)} · " +
-                    "stress ${e.stressMin}–${e.stressMax}% · ${e.batteryLevel}%"
-                Text(detail, style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                val detail =
+                    "${e.start.format(TIME_FMT)}–${e.end.format(TIME_FMT)} · " +
+                        "stress ${e.stressMin}–${e.stressMax}% · ${e.batteryLevel}%"
+                Text(
+                    detail,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
             Row {
                 TextButton(onClick = { onEdit(i) }) { Text("Edit") }
@@ -144,7 +153,10 @@ private fun AlcoholSection(
     SectionLabel("Alcohol")
     alcohol.forEachIndexed { i, sub ->
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("${sub.name}  ${sub.amount} ${sub.unit}", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                "${sub.name}  ${sub.amount} ${sub.unit}",
+                style = MaterialTheme.typography.bodyMedium,
+            )
             TextButton(onClick = { onRemove(i) }) { Text("Remove") }
         }
     }
@@ -157,19 +169,36 @@ private fun AddSubstanceRow(onAdd: (Substance) -> Unit) {
     var amount by remember { mutableStateOf("") }
     var unit by remember { mutableStateOf("") }
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        OutlinedTextField(name, { name = it }, label = { Text("Name") }, singleLine = true,
-            modifier = Modifier.weight(2f))
-        OutlinedTextField(amount, { amount = it }, label = { Text("Amount") }, singleLine = true,
+        OutlinedTextField(
+            name,
+            { name = it },
+            label = { Text("Name") },
+            singleLine = true,
+            modifier = Modifier.weight(2f),
+        )
+        OutlinedTextField(
+            amount,
+            { amount = it },
+            label = { Text("Amount") },
+            singleLine = true,
             modifier = Modifier.weight(1f),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
-        OutlinedTextField(unit, { unit = it }, label = { Text("Unit") }, singleLine = true,
-            modifier = Modifier.weight(1f))
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+        )
+        OutlinedTextField(
+            unit,
+            { unit = it },
+            label = { Text("Unit") },
+            singleLine = true,
+            modifier = Modifier.weight(1f),
+        )
     }
     val amountDouble = amount.toDoubleOrNull()
     if (name.isNotBlank() && amountDouble != null && unit.isNotBlank()) {
         TextButton(onClick = {
             onAdd(Substance(name.trim(), amountDouble, unit.trim()))
-            name = ""; amount = ""; unit = ""
+            name = ""
+            amount = ""
+            unit = ""
         }) { Text("+ Add") }
     }
 }

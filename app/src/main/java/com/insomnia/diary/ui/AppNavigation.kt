@@ -26,14 +26,28 @@ object Destination {
     object Morning {
         const val ROUTE = "morning?id={id}"
         const val NEW = "morning?id=$NO_ID"
-        val ARGS = listOf(navArgument("id") { type = NavType.LongType; defaultValue = NO_ID })
+        val ARGS =
+            listOf(
+                navArgument("id") {
+                    type = NavType.LongType
+                    defaultValue = NO_ID
+                },
+            )
+
         fun edit(id: Long) = "morning?id=$id"
     }
 
     object Evening {
         const val ROUTE = "evening?id={id}"
         const val NEW = "evening?id=$NO_ID"
-        val ARGS = listOf(navArgument("id") { type = NavType.LongType; defaultValue = NO_ID })
+        val ARGS =
+            listOf(
+                navArgument("id") {
+                    type = NavType.LongType
+                    defaultValue = NO_ID
+                },
+            )
+
         fun edit(id: Long) = "evening?id=$id"
     }
 }
@@ -56,13 +70,17 @@ fun AppNavigation() {
         composable(Destination.SETTINGS) {
             SettingsScreen(
                 onBack = { nav.popBackStack() },
-                viewModel = viewModel(factory = object : androidx.lifecycle.ViewModelProvider.Factory {
-                    @Suppress("UNCHECKED_CAST")
-                    override fun <T : androidx.lifecycle.ViewModel> create(
-                        modelClass: Class<T>,
-                        extras: androidx.lifecycle.viewmodel.CreationExtras,
-                    ): T = SettingsViewModel(app) as T
-                }),
+                viewModel =
+                    viewModel(
+                        factory =
+                            object : androidx.lifecycle.ViewModelProvider.Factory {
+                                @Suppress("UNCHECKED_CAST")
+                                override fun <T : androidx.lifecycle.ViewModel> create(
+                                    modelClass: Class<T>,
+                                    extras: androidx.lifecycle.viewmodel.CreationExtras,
+                                ): T = SettingsViewModel(app) as T
+                            },
+                    ),
             )
         }
         composable(Destination.Morning.ROUTE, Destination.Morning.ARGS) { back ->

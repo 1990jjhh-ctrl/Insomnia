@@ -75,7 +75,9 @@ to Google Play and has no backend or cloud account.
 - Recovery (0–100%).
 - In-bed timestamp and out-of-bed timestamp.
 - Asleep timestamp and wake timestamp.
-- Subjective sleep-onset latency (how long it *felt* to fall asleep).
+- Sleep-onset latency: derived from the in-bed → asleep timestamp
+  difference. The user sets the asleep timestamp to when they
+  perceived falling asleep, so the derived value is subjective.
 - Awake events: count and total time awake during the night.
 - Derived: time-to-asleep, sleep duration (span minus time awake).
 - Medication taken before bed (see substances).
@@ -121,10 +123,11 @@ to Google Play and has no backend or cloud account.
   - a **stress range** (min–max %); equal min and max means a flat level;
   - optional **attendees** (people), enabling "who drains me" analysis;
   - an optional note;
-  - for *battery checkpoint* events: a **battery level** (0–100 %).
+  - a **battery level** (0–100 %): the user's energy at the event's
+    start. A dedicated *battery checkpoint* event type is used for
+    standalone readings not tied to any other activity.
 - Naps are events of type *nap*; sleep stats locate them by type.
-- Per-event energy is derived from battery-checkpoint events over the
-  event's interval (see energy).
+- Per-event energy is visible from the battery trend across events.
 
 ### Stress (derived)
 
@@ -138,15 +141,16 @@ to Google Play and has no backend or cloud account.
 
 ### Energy (battery)
 
-- Energy is tracked via **battery checkpoint events**: events of type
-  *battery checkpoint* that carry a timestamped % reading
-  (0 % empty, 100 % full), on the same scale as recovery and stress.
-- The user drops a few of these into the day timeline rather than rating
-  every event; drain or recharge is derived between consecutive ones.
-- An event's energy cost is the battery change over its interval, so
-  events and battery correlate through time with no extra input.
-- The last battery checkpoint of the day stands in for an exhaustion
-  field; no separate field is needed.
+- Every event carries a **battery level** (0–100 %): the user's
+  energy at the event's start time. This puts energy and activity on
+  the same timeline with no extra input.
+- A dedicated *battery checkpoint* event type is provided for
+  standalone energy readings (e.g. "just woke from a nap, 65 %")
+  where no other event label applies.
+- The battery timeline is derived from all events sorted by start
+  time; the trend between them shows drain and recovery.
+- The last battery reading of the day serves as the exhaustion
+  indicator; no separate exhaustion field is needed.
 
 ## Features
 

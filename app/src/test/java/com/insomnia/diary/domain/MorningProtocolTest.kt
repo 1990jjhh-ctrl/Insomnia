@@ -8,7 +8,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 class MorningProtocolTest {
-
     private val base: LocalDate = LocalDate.of(2024, 1, 15)
 
     private fun protocol(
@@ -37,10 +36,11 @@ class MorningProtocolTest {
 
     @Test
     fun timeToFallAsleep_acrossMidnight() {
-        val p = protocol(
-            inBed = base.atTime(23, 45),
-            asleep = base.plusDays(1).atTime(0, 15),
-        )
+        val p =
+            protocol(
+                inBed = base.atTime(23, 45),
+                asleep = base.plusDays(1).atTime(0, 15),
+            )
         assertEquals(Duration.ofMinutes(30), p.timeToFallAsleep)
     }
 

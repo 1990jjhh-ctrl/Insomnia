@@ -23,17 +23,19 @@ class MorningRepository(private val db: InsomniaDatabase) {
     fun observeAll(): Flow<List<MorningProtocol>> =
         dao.observeAll().map { list -> list.map(MorningEntryFull::toDomain) }
 
-    fun observeLatest(): Flow<MorningProtocol?> =
-        dao.observeLatest().map { it?.toDomain() }
+    fun observeLatest(): Flow<MorningProtocol?> = dao.observeLatest().map { it?.toDomain() }
 
-    suspend fun findById(id: Long): MorningProtocol? =
-        dao.findById(id)?.toDomain()
+    suspend fun findById(id: Long): MorningProtocol? = dao.findById(id)?.toDomain()
 
-    suspend fun save(protocol: MorningProtocol) = db.withTransaction {
-        insertAll(protocol)
-    }
+    suspend fun save(protocol: MorningProtocol) =
+        db.withTransaction {
+            insertAll(protocol)
+        }
 
-    suspend fun update(id: Long, protocol: MorningProtocol) = db.withTransaction {
+    suspend fun update(
+        id: Long,
+        protocol: MorningProtocol,
+    ) = db.withTransaction {
         dao.deleteById(id)
         insertAll(protocol)
     }
@@ -47,36 +49,39 @@ class MorningRepository(private val db: InsomniaDatabase) {
     }
 }
 
-private fun MorningEntryFull.toDomain() = MorningProtocol(
-    id = entry.id,
-    recordedAt = entry.recordedAt,
-    moods = moods.map { Mood(it.label, it.valence, it.arousal) },
-    recovery = Percentage(entry.recovery),
-    inBed = entry.inBed,
-    outOfBed = entry.outOfBed,
-    asleep = entry.asleep,
-    wokeUp = entry.wokeUp,
-    perceivedSleepLatency = Duration.ofSeconds(entry.perceivedLatencySec),
-    awakeEvents = AwakeEvents(entry.awakeCount, Duration.ofSeconds(entry.totalAwakeSec)),
-    medication = medication.map { Substance(it.name, it.amount, it.unit) },
-    dream = entry.dreamType?.let { typeName ->
-        Dream.entries.find { it.name == typeName }?.let { DreamRecall(it, entry.dreamNote) }
-    },
-)
+private fun MorningEntryFull.toDomain() =
+    MorningProtocol(
+        id = entry.id,
+        recordedAt = entry.recordedAt,
+        moods = moods.map { Mood(it.label, it.valence, it.arousal) },
+        recovery = Percentage(entry.recovery),
+        inBed = entry.inBed,
+        outOfBed = entry.outOfBed,
+        asleep = entry.asleep,
+        wokeUp = entry.wokeUp,
+        perceivedSleepLatency = Duration.ofSeconds(entry.perceivedLatencySec),
+        awakeEvents = AwakeEvents(entry.awakeCount, Duration.ofSeconds(entry.totalAwakeSec)),
+        medication = medication.map { Substance(it.name, it.amount, it.unit) },
+        dream =
+            entry.dreamType?.let { typeName ->
+                Dream.entries.find { it.name == typeName }?.let { DreamRecall(it, entry.dreamNote) }
+            },
+    )
 
-private fun MorningProtocol.toEntity() = MorningEntryEntity(
-    recordedAt = recordedAt,
-    recovery = recovery.value,
-    inBed = inBed,
-    outOfBed = outOfBed,
-    asleep = asleep,
-    wokeUp = wokeUp,
-    perceivedLatencySec = perceivedSleepLatency.seconds,
-    awakeCount = awakeEvents.count,
-    totalAwakeSec = awakeEvents.totalAwake.seconds,
-    dreamType = dream?.type?.name,
-    dreamNote = dream?.note,
-)
+private fun MorningProtocol.toEntity() =
+    MorningEntryEntity(
+        recordedAt = recordedAt,
+        recovery = recovery.value,
+        inBed = inBed,
+        outOfBed = outOfBed,
+        asleep = asleep,
+        wokeUp = wokeUp,
+        perceivedLatencySec = perceivedSleepLatency.seconds,
+        awakeCount = awakeEvents.count,
+        totalAwakeSec = awakeEvents.totalAwake.seconds,
+        dreamType = dream?.type?.name,
+        dreamNote = dream?.note,
+    )
 
 private fun Mood.toEntity(entryId: Long) =
     MorningMoodEntity(entryId = entryId, label = label, valence = valence, arousal = arousal)

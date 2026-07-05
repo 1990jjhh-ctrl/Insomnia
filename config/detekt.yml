@@ -1,0 +1,46 @@
+# Project detekt overrides.
+# build.gradle.kts sets buildUponDefaultConfig = true, so every rule
+# not listed here keeps its default setting.
+
+naming:
+  FunctionNaming:
+    # Compose convention: @Composable functions use PascalCase.
+    ignoreAnnotated:
+      - 'Composable'
+
+complexity:
+  LongMethod:
+    # Compose UI functions are declarative and inherently verbose;
+    # line count alone is not a meaningful complexity signal here.
+    ignoreAnnotated:
+      - 'Composable'
+
+  LongParameterList:
+    # Compose entry-point functions pass many callback lambdas by
+    # design. Test builder functions use all-default parameters for
+    # call-site readability and are not truly hard to call.
+    ignoreAnnotated:
+      - 'Composable'
+    ignoreDefaultParameters: true
+
+  TooManyFunctions:
+    # DAOs, repositories, and ViewModels accumulate one function per
+    # operation by design. The default threshold of 11 is too tight.
+    thresholdInInterfaces: 20
+    thresholdInClasses: 20
+
+style:
+  MagicNumber:
+    # Coordinate literals in enum constants are self-documenting.
+    ignoreEnums: true
+    # Room Migration(from, to) version numbers are self-documenting;
+    # extend the default ignored set beyond [-1, 0, 1, 2].
+    ignoreNumbers:
+      - '-1'
+      - '0'
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+      - '5'
+      - '100'  # upper bound of a percentage — definitionally self-documenting

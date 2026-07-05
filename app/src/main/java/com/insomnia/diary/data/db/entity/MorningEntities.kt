@@ -26,12 +26,14 @@ data class MorningEntryEntity(
 
 @Entity(
     tableName = "morning_mood",
-    foreignKeys = [ForeignKey(
-        entity = MorningEntryEntity::class,
-        parentColumns = ["id"],
-        childColumns = ["entryId"],
-        onDelete = ForeignKey.CASCADE,
-    )],
+    foreignKeys = [
+        ForeignKey(
+            entity = MorningEntryEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["entryId"],
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
     indices = [Index("entryId")],
 )
 data class MorningMoodEntity(
@@ -44,12 +46,14 @@ data class MorningMoodEntity(
 
 @Entity(
     tableName = "morning_medication",
-    foreignKeys = [ForeignKey(
-        entity = MorningEntryEntity::class,
-        parentColumns = ["id"],
-        childColumns = ["entryId"],
-        onDelete = ForeignKey.CASCADE,
-    )],
+    foreignKeys = [
+        ForeignKey(
+            entity = MorningEntryEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["entryId"],
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
     indices = [Index("entryId")],
 )
 data class MorningMedicationEntity(

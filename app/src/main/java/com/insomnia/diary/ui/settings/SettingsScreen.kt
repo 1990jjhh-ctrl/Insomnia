@@ -38,7 +38,10 @@ import com.insomnia.diary.data.preferences.ThemeMode
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(onBack: () -> Unit, viewModel: SettingsViewModel) {
+fun SettingsScreen(
+    onBack: () -> Unit,
+    viewModel: SettingsViewModel,
+) {
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
     val customTypes by viewModel.customTypes.collectAsStateWithLifecycle()
     val customMoods by viewModel.customMoods.collectAsStateWithLifecycle()
@@ -56,10 +59,11 @@ fun SettingsScreen(onBack: () -> Unit, viewModel: SettingsViewModel) {
         },
     ) { padding ->
         Column(
-            modifier = Modifier
-                .padding(padding)
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState()),
+            modifier =
+                Modifier
+                    .padding(padding)
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Spacer(Modifier.height(4.dp))
@@ -77,7 +81,7 @@ fun SettingsScreen(onBack: () -> Unit, viewModel: SettingsViewModel) {
                                     ThemeMode.SYSTEM -> "System"
                                     ThemeMode.LIGHT -> "Light"
                                     ThemeMode.DARK -> "Dark"
-                                }
+                                },
                             )
                         },
                     )
@@ -109,7 +113,10 @@ private fun SectionLabel(text: String) {
 }
 
 @Composable
-private fun LabelRow(label: String, onDelete: () -> Unit) {
+private fun LabelRow(
+    label: String,
+    onDelete: () -> Unit,
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -121,7 +128,10 @@ private fun LabelRow(label: String, onDelete: () -> Unit) {
 }
 
 @Composable
-private fun AddRow(hint: String, onAdd: (String) -> Unit) {
+private fun AddRow(
+    hint: String,
+    onAdd: (String) -> Unit,
+) {
     var text by remember { mutableStateOf("") }
     Row(
         modifier = Modifier.fillMaxWidth(),

@@ -9,7 +9,6 @@ import java.time.Duration
 import java.time.LocalDateTime
 
 class DayEventTest {
-
     private val base: LocalDateTime = LocalDateTime.of(2024, 1, 15, 9, 0)
     private val stress = StressRange.flat(Percentage(30))
     private val battery = Percentage(70)
@@ -63,18 +62,20 @@ class DayEventTest {
     @Test
     fun eveningProtocol_batteryDerivedFromAllEvents() {
         val e1 = event(start = base, end = base.plusHours(2), batteryLevel = Percentage(80))
-        val e2 = event(
-            preset = EventTypePreset.MEAL,
-            start = base.plusHours(3),
-            end = base.plusHours(4),
-            batteryLevel = Percentage(60),
-        )
-        val protocol = EveningProtocol(
-            recordedAt = base,
-            moods = emptyList(),
-            productivity = Percentage(70),
-            events = listOf(e1, e2),
-        )
+        val e2 =
+            event(
+                preset = EventTypePreset.MEAL,
+                start = base.plusHours(3),
+                end = base.plusHours(4),
+                batteryLevel = Percentage(60),
+            )
+        val protocol =
+            EveningProtocol(
+                recordedAt = base,
+                moods = emptyList(),
+                productivity = Percentage(70),
+                events = listOf(e1, e2),
+            )
         assertEquals(2, protocol.battery.size)
         assertEquals(Percentage(80), protocol.battery[0].level)
         assertEquals(Percentage(60), protocol.battery[1].level)

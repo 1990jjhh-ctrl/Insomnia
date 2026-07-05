@@ -1,0 +1,15 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{kt,kts}]
+indent_size = 4
+max_line_length = 100
+# Compose uses PascalCase for @Composable functions; suppress the
+# camelCase-only rule for functions carrying that annotation.
+ktlint_function_naming_ignore_when_annotated_with = Composable

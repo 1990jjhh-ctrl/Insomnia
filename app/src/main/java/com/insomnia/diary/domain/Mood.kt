@@ -19,8 +19,7 @@ data class Mood(
     }
 
     companion object {
-        fun from(preset: FeelingPreset): Mood =
-            Mood(preset.label, preset.valence, preset.arousal)
+        fun from(preset: FeelingPreset): Mood = Mood(preset.label, preset.valence, preset.arousal)
     }
 }
 
